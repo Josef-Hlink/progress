@@ -10,14 +10,14 @@ from progress import ProgressBar
 from time import sleep
 
 def test():
-    total_computations = 100
-    custom_bar = ProgressBar(total_computations, bar_width=50, char='=', head='>', todo=' ',
-                             spinner=True, percentage=True)
-    
+    total_computations = 500
+    computation_time = 0.01
+
+    custom_bar = ProgressBar(total_computations, bar_width=50, char='=', head='>', todo='-',
+                             spinner=False, percentage=True)
     for _ in range(total_computations):
         custom_bar()
-        sleep(0.1)
-    pass
+        sleep(computation_time) # dummy function
 
 if __name__ == '__main__':
     test()
