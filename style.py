@@ -13,6 +13,19 @@ class Style:
         style_file = 'style.txt'
         self.c = self.load_base_colors(style_file)
 
+    def set_color(self, color: str, char: str = None) -> str:
+        """Set the color of a character (base, head, or todo)"""
+        if color not in set(self.c.keys()):
+            raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
+        return getattr(self, color)(self.strip_fg_color(char))
+    
+    def set_bg_color(self, color: str, char: str = None):
+        """Set the background color of a character (base, head, or todo)"""
+        if color not in set(self.c.keys()):
+            raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
+        bg_color = color+'_bg'
+        return getattr(self, bg_color)(self.strip_bg_color(char))
+
     def get_original(self, string: str) -> str:
         """Remove all font effects and coloring from a string to get the original"""
         for color_code in re.findall('[0-5]|[349][0-7]|10[0-7]', string):

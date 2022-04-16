@@ -47,47 +47,45 @@ class ProgressBar:
         return self._update()
 
     def _config(self) -> None:
-        """Set configurations: spinner frames and available colors"""
+        """Set configurations: spinner frames and style object"""
         self.spinner_frames = ['/', '-', '\\', '|'] if self.show_spinner else ['', '', '', '']
         self.S = Style()
-        self.color_dict = self.S.c
-        self.available_colors = set(self.color_dict.keys())
         pass
 
     def set_char(self, char: str = None, color: str = None, bg_color: str = None) -> None:
         """Set *single* character to represent the loaded portion of the progress bar"""
         if char is None:
             char = self.base_char
-        if not self._check_char(char):
+        elif not self._check_char(char):
             raise ValueError(f'Invalid character {char} with length {len(char)}, choose a single character')
         if color is not None:
-            char = self._set_color(color, char)
+            char = self.S.set_color(color, char)
         if bg_color is not None:
-            char = self._set_bg_color(bg_color, char)
+            char = self.S.set_bg_color(bg_color, char)
         self.base_char = char
 
     def set_head(self, char: str = None, color: str = None, bg_color: str = None) -> None:
         """Set *single* character to represent the head of the loaded portion of the progress bar"""
         if char is None:
             char = self.head_char
-        if not self._check_char(char):
+        elif not self._check_char(char):
             raise ValueError(f'Invalid character {char} with length {len(char)}, choose a single character')
         if color is not None:
-            char = self._set_color(color, char)
+            char = self.S.set_color(color, char)
         if bg_color is not None:
-            char = self._set_bg_color(bg_color, char)
+            char = self.S.set_bg_color(bg_color, char)
         self.head_char = char
     
     def set_todo(self, char: str = None, color: str = None, bg_color: str = None) -> None:
         """Set *single* character to represent the portion of the progress bar that has yet to be loaded"""
         if char is None:
             char = self.todo_char
-        if not self._check_char(char):
+        elif not self._check_char(char):
             raise ValueError(f'Invalid character "{char}" with length {len(char)}, choose a single character')
         if color is not None:
-            char = self._set_color(color, char)
+            char = self.S.set_color(color, char)
         if bg_color is not None:
-            char = self._set_bg_color(bg_color, char)
+            char = self.S.set_bg_color(bg_color, char)
         self.todo_char = char
 
     def set_braces(self, chars: str = None, color: str = None, bg_color: str = None) -> None:
@@ -101,11 +99,11 @@ class ProgressBar:
             open_brace = chars[0]
             close_brace = chars[1]
         if color is not None:
-            open_brace = self._set_color(color, open_brace)
-            close_brace = self._set_color(color, close_brace)
+            open_brace = self.S.set_color(color, open_brace)
+            close_brace = self.S.set_color(color, close_brace)
         if bg_color is not None:
-            open_brace = self._set_bg_color(bg_color, open_brace)
-            close_brace = self._set_bg_color(bg_color, close_brace)
+            open_brace = self.S.set_bg_color(bg_color, open_brace)
+            close_brace = self.S.set_bg_color(bg_color, close_brace)
         self.open_brace_char = open_brace
         self.close_brace_char = close_brace
 
@@ -128,19 +126,6 @@ class ProgressBar:
             raise ValueError(f'Invalid part "{part}", only base, head and todo are supported')
         char_before = getattr(self, part+'_char')
         setattr(self, part+'_char', apply_effect(Style(), char_before))
-
-    def _set_color(self, color: str, char: str = None) -> str:
-        """Set the color of a character (base, head, or todo)"""
-        if color not in self.available_colors:
-            raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
-        return getattr(Style, color)(self.S, self.S.strip_fg_color(char))
-    
-    def _set_bg_color(self, color: str, char: str = None):
-        """Set the background color of a character (base, head, or todo)"""
-        if color not in self.available_colors:
-            raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
-        bg_color = color+'_bg'
-        return getattr(Style, bg_color)(self.S, self.S.strip_bg_color(char))
 
     def _update(self) -> None:
         """Update the progress bar by one iteration"""

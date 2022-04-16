@@ -12,9 +12,9 @@ from time import sleep, time
 def main():
     total_computations = 500
     computation_time = 0.005
-    test_default(total_computations, computation_time)
+    # test_default(total_computations, computation_time)
     test_custom(total_computations, computation_time)
-    test_overhead(total_computations, computation_time)
+    #test_overhead(total_computations, computation_time)
 
 def run(bar, total_computations, computation_time):
     for _ in range(total_computations):
@@ -36,9 +36,13 @@ def test_custom(total_computations, computation_time):
     bar.set_char('>', 'magenta', 'black')
     bar.set_head('O', bg_color='black')
     bar.set_todo(color='magenta')
+    bar.set_char('*', 'blue', 'white')
 
     bar.style('bold', 'base')
     bar.style('faint', 'todo')
+
+    bar.set_char(color='magenta', bg_color='black')
+    bar.set_braces(color='bright_magenta')
 
     print('individual character customization')
     run(bar, total_computations, computation_time)
