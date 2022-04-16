@@ -12,9 +12,9 @@ from time import sleep, time
 def main():
     total_computations = 500
     computation_time = 0.005
-    # test_default(total_computations, computation_time)
+    test_default(total_computations, computation_time)
     test_custom(total_computations, computation_time)
-    #test_overhead(total_computations, computation_time)
+    test_overhead(total_computations, computation_time)
 
 def run(bar, total_computations, computation_time):
     for _ in range(total_computations):
@@ -67,7 +67,7 @@ def test_overhead(total_computations, computation_time):
         end = time()
         return end - start
 
-    print('calculating overhead')
+    print('calculating overhead...')
     overhead = run_with(total_computations, computation_time) - run_without(total_computations, computation_time)    
     print(f'{overhead = :.2f} sec')
 

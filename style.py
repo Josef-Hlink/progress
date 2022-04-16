@@ -14,13 +14,13 @@ class Style:
         self.c = self.load_base_colors(style_file)
 
     def set_color(self, color: str, char: str = None) -> str:
-        """Set the color of a character (base, head, or todo)"""
+        """Set the color of a character (base, head, todo or brace)"""
         if color not in set(self.c.keys()):
             raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
         return getattr(self, color)(self.strip_fg_color(char))
     
     def set_bg_color(self, color: str, char: str = None):
-        """Set the background color of a character (base, head, or todo)"""
+        """Set the background color of a character (base, head, todo or brace)"""
         if color not in set(self.c.keys()):
             raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
         bg_color = color+'_bg'
@@ -28,25 +28,25 @@ class Style:
 
     def get_original(self, string: str) -> str:
         """Remove all font effects and coloring from a string to get the original"""
-        for color_code in re.findall('[0-5]|[349][0-7]|10[0-7]', string):
+        for color_code in re.findall('[0-5]|[349][0-7]|10[0-7]', string):   # 0-5, 30-37, 40-47, 90-97, 100-107
             string = string.replace(f'\033[{color_code}m', '')
         return string 
     
     def strip_all_colors(self, string: str) -> str:
         """Remove all coloring of a string"""
-        for color_code in re.findall('0|[349][0-7]|10[0-7]', string):
+        for color_code in re.findall('0|[349][0-7]|10[0-7]', string):       # 0, 30-37, 40-47, 90-97, 100-107
             string = string.replace(f'\033[{color_code}m', '')
         return string
     
     def strip_fg_color(self, string: str) -> str:
         """Remove all foreground coloring of a string"""
-        for color_code in re.findall('[39][0-7]', string):
+        for color_code in re.findall('[39][0-7]', string):                  # 30-37, 90-97
             string = string.replace(f'\033[{color_code}m', '')
         return string
     
     def strip_bg_color(self, string: str) -> str:
         """Remove all background coloring of a string"""
-        for color_code in re.findall('4[0-7]|10[0-7]', string):
+        for color_code in re.findall('4[0-7]|10[0-7]', string):             # 40-47, 100-107
             string = string.replace(f'\033[{color_code}m', '')
         return string
 
@@ -188,12 +188,6 @@ class Style:
         def bright_white_bg(self, string: str) -> str:
             return f"\033[{self.c['bright_white'][1]}m{string}\033[0m"
 
-def test():
-    S = Style()
-    print('color dict:')
-    print(S.c)
-    print(S.bright_green_bg(S.white('hello')))
-    print(S.blink(S.magenta('bye')))
 
 if __name__ == '__main__':
-    test()
+    print('Do not run this file directly.')
