@@ -11,6 +11,13 @@ class Style:
         style_file = 'style.txt'
         self.c = self.load_base_colors(style_file)
 
+    def get_original(self, string: str) -> str:
+        """Strip a string from all styling"""
+        if len(string) <= 1: # empty strings have to be caught in Progress.check_char()
+            return string
+        string = string[:-len('\033[0m')] # all styled strings have the "reset" suffix
+        return string[-1]
+
     def load_base_colors(self, filename: str) -> dict:
         """Read all base color codes (just numbers) from given .txt file"""
         c = dict()

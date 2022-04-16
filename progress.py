@@ -86,18 +86,38 @@ class ProgressBar:
             char = self._set_bg_color(bg_color, char)
         self.todo_char = char
     
+    def style(self, effect: str, part: str = None) -> None:
+        """
+        Add a style to a part of the bar
+        ---
+        params:
+            - effect: [str] effect to be applied to a character, currently supported:
+                * bold, faint, italic, underline, blink
+            - part: [str] part of the bar to be styled, currently supported:
+                * base, head, todo
+        ---
+        TODO add support for multiple effects and multiple parts
+        """
+        if effect not in ['bold', 'faint', 'italic', 'underline', 'blink']:
+            raise ValueError(f'Invalid effect "{effect}", only bold, faint, italic, underline and blink are supported')
+        apply_effect: function = getattr(Style, effect)
+        if part not in ['base', 'head', 'todo']: # TODO add support for guards, and suffix parts
+            raise ValueError(f'Invalid part "{part}", only base, head and todo are supported')
+        char_before = getattr(self, part+'_char')
+        setattr(self, part+'_char', apply_effect(Style(), char_before))
+
     def _set_color(self, color: str, char: str = None) -> str:
         """Set the color of a character (base, head, or todo)"""
         if color not in self.available_colors:
             raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
-        return getattr(Style, color)(Style(), char)
+        return getattr(Style, color)(Style(), Style().get_original(char))
     
     def _set_bg_color(self, color: str, char: str = None):
         """Set the background color of a character (base, head, or todo)"""
         bg_color = color+'_bg'
         if color not in self.available_colors:
             raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
-        return getattr(Style, bg_color)(Style(), char)
+        return getattr(Style, bg_color)(Style(), Style().get_original(char))
 
     def _update(self) -> None:
         """Update the progress bar by one iteration"""
@@ -113,7 +133,7 @@ class ProgressBar:
 
     def _check_char(self, char: str) -> bool:
         """Check if a given character is useable in the progress bar"""
-        return isinstance(char, str) and len(char) == 1
+        return isinstance(char, str) and len(Style().get_original(char)) == 1
 
     def _compose(self, steps: int, percentage: int) -> str:
         """Compose the complete line that is to be printed"""

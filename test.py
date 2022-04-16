@@ -12,7 +12,6 @@ from time import sleep, time
 def main():
     test()
     #test_overhead()
-    pass
 
 def test_overhead():
 
@@ -42,13 +41,15 @@ def test_overhead():
 def test():
     total_computations = 500
     computation_time = 0.01
-    custom_bar = ProgressBar(total_computations, bar_width=50, char='=', head='>', todo=' ',
-                             spinner=True, percentage=True, color='blue', bg_color='black')
+    custom_bar = ProgressBar(total_computations)
     
-    # custom_bar.set_char(color='green', bg_color='bright_cyan')
-    # custom_bar.set_head('0', 'black', 'magenta')
-    # custom_bar.set_todo('<', bg_color='bright_cyan')
+    custom_bar.set_char(color='bright_white', bg_color='blue')
+    custom_bar.set_head('-', 'bright_white', 'bright_cyan')
+    custom_bar.set_todo('-', bg_color='bright_cyan')
     
+    custom_bar.style('bold', 'base')
+    custom_bar.style('blink', 'todo')
+
     for _ in range(total_computations):
         custom_bar()
         sleep(computation_time)
