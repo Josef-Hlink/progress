@@ -10,49 +10,62 @@ from progress import ProgressBar
 from time import sleep, time
 
 def main():
-    test()
-    #test_overhead()
+    total_computations = 500
+    computation_time = 0.005
+    test_default(total_computations, computation_time)
+    test_custom(total_computations, computation_time)
+    test_overhead(total_computations, computation_time)
 
-def test_overhead():
+def run(bar, total_computations, computation_time):
+    for _ in range(total_computations):
+        bar()
+        sleep(computation_time)
+
+def test_default(total_computations, computation_time):
+    print('default')
+    bar1 = ProgressBar(total_computations)
+    run(bar1, total_computations, computation_time)
+
+    print('spinner off, basic coloring, custom characters')
+    bar2 = ProgressBar(total_computations, spinner=False, color='green', bg_color='yellow', head='H')
+    run(bar2, total_computations, computation_time)
+
+def test_custom(total_computations, computation_time):
+    bar = ProgressBar(total_computations, braces='{}')
+    
+    bar.set_char('>', 'magenta', 'black')
+    bar.set_head('O', bg_color='black')
+    bar.set_todo(color='magenta')
+
+    bar.style('bold', 'base')
+    bar.style('faint', 'todo')
+
+    print('individual character customization')
+    run(bar, total_computations, computation_time)
+
+def test_overhead(total_computations, computation_time):
 
     def run_with(total_computations: int, computation_time: float) -> float:
         start = time()
-        custom_bar = ProgressBar(total_computations, bar_width=50, char='=', head='>', todo=' ',
-                                 spinner=True, percentage=True)
+        bar = ProgressBar(total_computations)
         for _ in range(total_computations):
-            custom_bar()
+            bar()
             sleep(computation_time)
         end = time()
         return end - start
     
     def run_without(total_computations: int, computation_time: float) -> float:
         start = time()
+        # place for bar initialization
         for _ in range(total_computations):
+            # place for bar updating
             sleep(computation_time)
         end = time()
         return end - start
 
-    total_computations = 500
-    computation_time = 0.01
+    print('calculating overhead')
     overhead = run_with(total_computations, computation_time) - run_without(total_computations, computation_time)    
     print(f'{overhead = :.2f} sec')
-
-
-def test():
-    total_computations = 500
-    computation_time = 0.01
-    custom_bar = ProgressBar(total_computations)
-    
-    custom_bar.set_char(color='bright_white', bg_color='blue')
-    custom_bar.set_head('-', 'bright_white', 'bright_cyan')
-    custom_bar.set_todo('-', bg_color='bright_cyan')
-    
-    custom_bar.style('bold', 'base')
-    custom_bar.style('blink', 'todo')
-
-    for _ in range(total_computations):
-        custom_bar()
-        sleep(computation_time)
 
 
 if __name__ == '__main__':

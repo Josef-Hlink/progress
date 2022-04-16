@@ -9,7 +9,7 @@ Author: J.D. Hamelink
 from style import Style
 
 class ProgressBar:
-    def __init__(self, n_iterations: int, bar_width: int = 50, char: str = '=', head: str = '>', todo: str = '-',
+    def __init__(self, n_iterations: int, bar_width: int = 50, char: str = '=', head: str = '>', todo: str = '-', braces: str = '[]',
                  spinner: bool = True, percentage: bool = True, color: str = None, bg_color: str = None) -> None:
         """
         Progress bar for visualizing a process with fixed number of iterations
@@ -20,6 +20,7 @@ class ProgressBar:
             - char: [str] *single* character representing the loaded portion of the bar
             - head: [str] *single* character leading the loaded portion of the bar
             - todo: [str] *single* character representing the portion of the bar that still has to be loaded
+            - braces: [str] *two* characters that encapsulate the bar
             - spinner: [bool] set to True for a spinner in the suffix
             - percentage: [bool] set to True for a percentage in the suffix
             - color: [str] color to set all three bar characters as
@@ -35,6 +36,7 @@ class ProgressBar:
         self.set_char(char, color, bg_color)
         self.set_head(head, color, bg_color)
         self.set_todo(todo, color, bg_color)
+        self.set_braces(braces, color, bg_color)
 
         self.i = 0
         self.done = False
@@ -47,7 +49,9 @@ class ProgressBar:
     def _config(self) -> None:
         """Set configurations: spinner frames and available colors"""
         self.spinner_frames = ['/', '-', '\\', '|'] if self.show_spinner else ['', '', '', '']
-        self.available_colors = set(Style().c.keys())
+        self.S = Style()
+        self.color_dict = self.S.c
+        self.available_colors = set(self.color_dict.keys())
         pass
 
     def set_char(self, char: str = None, color: str = None, bg_color: str = None) -> None:
@@ -85,7 +89,26 @@ class ProgressBar:
         if bg_color is not None:
             char = self._set_bg_color(bg_color, char)
         self.todo_char = char
-    
+
+    def set_braces(self, chars: str = None, color: str = None, bg_color: str = None) -> None:
+        """Set *two* characters as braces for the bar"""
+        if chars is None:
+            open_brace = self.open_brace_char
+            close_brace = self.close_brace_char
+        else:
+            if not self._check_braces(chars):
+                raise ValueError(f'Invalid brace characters "{chars}" with length {len(chars)}, choose exactly two characters')
+            open_brace = chars[0]
+            close_brace = chars[1]
+        if color is not None:
+            open_brace = self._set_color(color, open_brace)
+            close_brace = self._set_color(color, close_brace)
+        if bg_color is not None:
+            open_brace = self._set_bg_color(bg_color, open_brace)
+            close_brace = self._set_bg_color(bg_color, close_brace)
+        self.open_brace_char = open_brace
+        self.close_brace_char = close_brace
+
     def style(self, effect: str, part: str = None) -> None:
         """
         Add a style to a part of the bar
@@ -110,14 +133,28 @@ class ProgressBar:
         """Set the color of a character (base, head, or todo)"""
         if color not in self.available_colors:
             raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
-        return getattr(Style, color)(Style(), Style().get_original(char))
+        if len(char) < 9: # a colored character has at least length 9
+            return getattr(Style, color)(self.S, char)
+        
+        colored_already = set(list(range(30, 38)) + list(range(90, 98)))
+        for i in range(len(char)-3):
+            if color[i:i+2] in colored_already: # char already has a fg color code
+                return getattr(Style, color)(self.S, self.S.get_original(char)) # so it has to be stripped
+        return getattr(Style, color)(self.S, char) # no fg coloring found, so color is just added to char
     
     def _set_bg_color(self, color: str, char: str = None):
         """Set the background color of a character (base, head, or todo)"""
-        bg_color = color+'_bg'
         if color not in self.available_colors:
             raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
-        return getattr(Style, bg_color)(Style(), Style().get_original(char))
+        bg_color = color+'_bg'
+        if len(char) < 9: # a colored character has at least length 9
+            return getattr(Style, bg_color)(self.S, char)
+        
+        colored_already = set(list(range(40, 48)) + list(range(100, 108)))
+        for i in range(len(char)-4):
+            if color[i:i+2] in colored_already or color[i:i+3] in colored_already: # char already has a bg color code
+                return getattr(Style, bg_color)(self.S, self.S.get_original(char)) # so it has to be stripped
+        return getattr(Style, bg_color)(self.S, char) # no bg coloring found, so color is just added to char
 
     def _update(self) -> None:
         """Update the progress bar by one iteration"""
@@ -133,19 +170,23 @@ class ProgressBar:
 
     def _check_char(self, char: str) -> bool:
         """Check if a given character is useable in the progress bar"""
-        return isinstance(char, str) and len(Style().get_original(char)) == 1
+        return isinstance(char, str) and len(self.S.get_original(char)) == 1
+    
+    def _check_braces(self, chars: str) -> bool:
+        """Check if a given set of characters is useable as a set of braces for the progress bar"""
+        return isinstance(chars, str) and len(chars) == 2
 
     def _compose(self, steps: int, percentage: int) -> str:
         """Compose the complete line that is to be printed"""
         spin_char = self.spinner_frames[self.i%4]
         bar = f'{steps*self.base_char}{self.head_char}{(self.bar_width-steps)*self.todo_char}'
         suffix = f'{spin_char} {percentage}%' if self.show_percentage else spin_char
-        return f'[{bar}]{suffix}'
+        return f'{self.open_brace_char}{bar}{self.close_brace_char}{suffix}'
     
     def _render(self, line: str) -> None:
         """Print the line on by replacing the previous line"""
         if self.done:
-            line = f'[{(self.bar_width+1)*self.base_char}] complete\n'
+            line = f'{self.open_brace_char}{(self.bar_width+1)*self.base_char}{self.close_brace_char} complete\n'
         print(f'\r{line}', end='')
 
 

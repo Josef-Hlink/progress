@@ -6,6 +6,8 @@ Initial commit: 15-04-2022
 Author: J.D. Hamelink
 """
 
+import re # stripping styles from strings
+
 class Style:
     def __init__(self):
         style_file = 'style.txt'
@@ -16,7 +18,18 @@ class Style:
         if len(string) <= 1: # empty strings have to be caught in Progress.check_char()
             return string
         string = string[:-len('\033[0m')] # all styled strings have the "reset" suffix
-        return string[-1]
+        result_length = 0
+        for c in range(len(string)-1, 0, -1):
+            if string[c] != 'm':
+                result_length += 1
+            elif string[c-1] == 'm':
+                result_length += 1
+                break
+            else:
+                break
+
+        string = string[len(string)-result_length:]
+        return string # TODO add support for longer originals (length 2 for example)
 
     def load_base_colors(self, filename: str) -> dict:
         """Read all base color codes (just numbers) from given .txt file"""
