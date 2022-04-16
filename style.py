@@ -14,22 +14,28 @@ class Style:
         self.c = self.load_base_colors(style_file)
 
     def get_original(self, string: str) -> str:
-        """Strip a string from all styling"""
-        if len(string) <= 1: # empty strings have to be caught in Progress.check_char()
-            return string
-        string = string[:-len('\033[0m')] # all styled strings have the "reset" suffix
-        result_length = 0
-        for c in range(len(string)-1, 0, -1):
-            if string[c] != 'm':
-                result_length += 1
-            elif string[c-1] == 'm':
-                result_length += 1
-                break
-            else:
-                break
-
-        string = string[len(string)-result_length:]
-        return string # TODO add support for longer originals (length 2 for example)
+        """Remove all font effects and coloring from a string to get the original"""
+        for color_code in re.findall('[0-5]|[349][0-7]|10[0-7]', string):
+            string = string.replace(f'\033[{color_code}m', '')
+        return string 
+    
+    def strip_all_colors(self, string: str) -> str:
+        """Remove all coloring of a string"""
+        for color_code in re.findall('0|[349][0-7]|10[0-7]', string):
+            string = string.replace(f'\033[{color_code}m', '')
+        return string
+    
+    def strip_fg_color(self, string: str) -> str:
+        """Remove all foreground coloring of a string"""
+        for color_code in re.findall('[39][0-7]', string):
+            string = string.replace(f'\033[{color_code}m', '')
+        return string
+    
+    def strip_bg_color(self, string: str) -> str:
+        """Remove all background coloring of a string"""
+        for color_code in re.findall('4[0-7]|10[0-7]', string):
+            string = string.replace(f'\033[{color_code}m', '')
+        return string
 
     def load_base_colors(self, filename: str) -> dict:
         """Read all base color codes (just numbers) from given .txt file"""

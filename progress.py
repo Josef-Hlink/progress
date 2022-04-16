@@ -133,28 +133,14 @@ class ProgressBar:
         """Set the color of a character (base, head, or todo)"""
         if color not in self.available_colors:
             raise ValueError(f'Invalid color "{color}", look at the README to see all available colors') # TODO actually write README
-        if len(char) < 9: # a colored character has at least length 9
-            return getattr(Style, color)(self.S, char)
-        
-        colored_already = set(list(range(30, 38)) + list(range(90, 98)))
-        for i in range(len(char)-3):
-            if color[i:i+2] in colored_already: # char already has a fg color code
-                return getattr(Style, color)(self.S, self.S.get_original(char)) # so it has to be stripped
-        return getattr(Style, color)(self.S, char) # no fg coloring found, so color is just added to char
+        return getattr(Style, color)(self.S, self.S.strip_fg_color(char))
     
     def _set_bg_color(self, color: str, char: str = None):
         """Set the background color of a character (base, head, or todo)"""
         if color not in self.available_colors:
             raise ValueError(f'Invalid background color "{color}", look at the README to see all available colors') # TODO actually write README
         bg_color = color+'_bg'
-        if len(char) < 9: # a colored character has at least length 9
-            return getattr(Style, bg_color)(self.S, char)
-        
-        colored_already = set(list(range(40, 48)) + list(range(100, 108)))
-        for i in range(len(char)-4):
-            if color[i:i+2] in colored_already or color[i:i+3] in colored_already: # char already has a bg color code
-                return getattr(Style, bg_color)(self.S, self.S.get_original(char)) # so it has to be stripped
-        return getattr(Style, bg_color)(self.S, char) # no bg coloring found, so color is just added to char
+        return getattr(Style, bg_color)(self.S, self.S.strip_bg_color(char))
 
     def _update(self) -> None:
         """Update the progress bar by one iteration"""
