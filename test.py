@@ -14,6 +14,7 @@ def main():
     computation_time = 0.005
     test_default(total_computations, computation_time)
     test_custom(total_computations, computation_time)
+    test_preset(total_computations, computation_time)
     test_overhead(total_computations, computation_time)
 
 def run(bar, total_computations, computation_time):
@@ -47,6 +48,15 @@ def test_custom(total_computations, computation_time):
     print('individual character customization')
     run(bar, total_computations, computation_time)
 
+def test_preset(total_computations, computation_time):
+    bar1 = ProgressBar(total_computations, preset = 'minimal')
+    print('preset: minimal')
+    run(bar1, total_computations, computation_time)
+
+    bar2 = ProgressBar(total_computations, preset = 'oldschool')
+    print('preset: oldschool')
+    run(bar2, total_computations, computation_time)
+
 def test_overhead(total_computations, computation_time):
 
     def run_with(total_computations: int, computation_time: float) -> float:
@@ -69,7 +79,7 @@ def test_overhead(total_computations, computation_time):
 
     print('calculating overhead...')
     overhead = run_with(total_computations, computation_time) - run_without(total_computations, computation_time)    
-    print(f'{overhead = :.2f} sec')
+    print(f'{overhead = :.4f} sec')
 
 
 if __name__ == '__main__':

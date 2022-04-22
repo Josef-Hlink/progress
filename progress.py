@@ -10,7 +10,7 @@ from style import Style
 
 class ProgressBar:
     def __init__(self, n_iterations: int, bar_width: int = 50, char: str = '=', head: str = '>', todo: str = '-', braces: str = '[]',
-                 spinner: bool = True, percentage: bool = True, color: str = None, bg_color: str = None) -> None:
+                 spinner: bool = True, percentage: bool = True, color: str = None, bg_color: str = None, preset: str = None) -> None:
         """
         Progress bar for visualizing a process with fixed number of iterations
         ---
@@ -25,6 +25,7 @@ class ProgressBar:
             - percentage: [bool] set to True for a percentage in the suffix
             - color: [str] color to set all three bar characters as
             - bg_color: [str] color to set the backgrounds for all three bar characters as
+            - preset: [str] choose from a select few presets {minimal, oldschool}
         """
         self.n_iters = n_iterations
         self.bar_width = bar_width
@@ -37,6 +38,7 @@ class ProgressBar:
         self.set_head(head, color, bg_color)
         self.set_todo(todo, color, bg_color)
         self.set_braces(braces, color, bg_color)
+        self.set_preset(preset)
 
         self.i = 0
         self.done = False
@@ -51,6 +53,33 @@ class ProgressBar:
         self.spinner_frames = ['/', '-', '\\', '|'] if self.show_spinner else ['', '', '', '']
         self.S = Style()
         pass
+
+    def set_preset(self, preset: str) -> None:
+        """
+        Choose a predefined style configuration
+        ---
+        currently supported:
+            - minimal
+            - oldschool
+        """
+        if preset == 'minimal':
+            self.spinner_frames = ['', '', '', '']
+            self.show_percentage = False
+            self.set_braces('[]', color = 'blue', bg_color = 'white')
+            self.set_char('━', color = 'blue', bg_color = 'white')
+            self.style('bold', 'base')
+            self.set_head('►', color = 'blue', bg_color = 'white')
+            # self.style()
+            self.set_todo('━', color = 'blue', bg_color = 'white')
+            self.style('faint', 'todo')
+        elif preset == 'oldschool':
+            self.spinner_frames = ['', '', '', '']
+            self.show_percentage = False
+            self.set_braces('  ', color = 'green', bg_color = 'black')
+            self.set_char('■', color = 'green', bg_color = 'black')
+            self.set_head('■', color = 'green', bg_color = 'black')
+            self.set_todo('□', color = 'green', bg_color = 'black')
+            self.style('faint', 'todo')
 
     def set_char(self, char: str = None, color: str = None, bg_color: str = None) -> None:
         """Set *single* character to represent the loaded portion of the progress bar"""
