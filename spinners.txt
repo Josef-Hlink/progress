@@ -1,0 +1,29 @@
+# 4
+frames = ['▘', '▝', '▗', '▖']	# quarter
+frames = ['▟', '▙', '▛', '▜']	# inv_quarter
+frames = ['◧', '◩', '◨', '◪']	# half_box
+frames = ['◴', '◷', '◶', '◵']	# clock
+frames = ['◸', '◹', '◿', '◺']	# triangle_corners
+frames = ['◤', '◥', '◢', '◣']   # triangle_corners_filled
+frames = ['◰', '◳', '◲', '◱']   # quarter_box
+
+# 10
+frames = ['╴', '╸', '╾', '╼', '╺', '╶', '╺', '╼', '╾', '╸']	# slider
+frames = ['╵', '╹', '╿', '╽', '╻', '╷', '╻', '╽', '╿', '╹']	# vertical_slider
+
+# 8
+frames = ['╀', '╄', '┾', '╆', '╁', '╅', '┽', '╃']	# cross_slider
+frames = ['▘', '▀', '▝', '▐', '▗', '▄', '▖', '▌']	# dynamic_quarter
+frames = ['⧔', '⧑', '⧓', '⧒', '⧕', '⧒', '⧓', '⧑']	# horizontal_hourglass
+
+#4 (2c)
+frames = ['◜ ', ' ◝', ' ◞', '◟ ']	# quarter_circle
+
+#2
+frames = ['⨁', '⨂']		# wheel
+
+
+# bar
+done, todo = '┅', '┄'   # dots
+
+done, todo = '━', '─'   # better_dash
