@@ -7,6 +7,7 @@ Author: J.D. Hamelink
 """
 
 from style import Style
+from spinner import Spinner
 
 class ProgressBar:
     def __init__(self, n_iterations: int, bar_width: int = 50, char: str = '=', head: str = '>', todo: str = '-', braces: str = '[]',
@@ -33,11 +34,15 @@ class ProgressBar:
         self.show_spinner = spinner
         self.show_percentage = percentage
 
-        self._config()
+        self.S = Style()
+
         self.set_char(char, color, bg_color)
         self.set_head(head, color, bg_color)
         self.set_todo(todo, color, bg_color)
         self.set_braces(braces, color, bg_color)
+
+        spinner_name = 'default' if spinner else ''
+        self.set_spinner(spinner_name, color, bg_color)
         self.set_preset(preset)
 
         self.i = 0
@@ -47,12 +52,6 @@ class ProgressBar:
     def __call__(self) -> None:
         """Wrapper for update function"""
         return self._update()
-
-    def _config(self) -> None:
-        """Set configurations: spinner frames and style object"""
-        self.spinner_frames = ['/', '-', '\\', '|'] if self.show_spinner else ['', '', '', '']
-        self.S = Style()
-        pass
 
     def set_preset(self, preset: str) -> None:
         """
@@ -69,9 +68,9 @@ class ProgressBar:
             self.set_char('━', color = 'blue', bg_color = 'white')
             self.style('bold', 'base')
             self.set_head('►', color = 'blue', bg_color = 'white')
-            # self.style()
             self.set_todo('━', color = 'blue', bg_color = 'white')
             self.style('faint', 'todo')
+            self.set_spinner('slider')
         elif preset == 'oldschool':
             self.spinner_frames = ['', '', '', '']
             self.show_percentage = False
@@ -80,6 +79,7 @@ class ProgressBar:
             self.set_head('■', color = 'green', bg_color = 'black')
             self.set_todo('□', color = 'green', bg_color = 'black')
             self.style('faint', 'todo')
+            self.set_spinner('dynamic_quarter')
 
     def set_char(self, char: str = None, color: str = None, bg_color: str = None) -> None:
         """Set *single* character to represent the loaded portion of the progress bar"""
@@ -136,6 +136,10 @@ class ProgressBar:
         self.open_brace_char = open_brace                               # store as attributes
         self.close_brace_char = close_brace                             # ""
 
+    def set_spinner(self, name: str = 'default', color: str = None, bg_color: str = None) -> None:
+        """Set spinner, colors will be implemented shortly"""
+        self.spinner = Spinner(name)                         # initialize spinner
+
     def style(self, effect: str, part: str = None) -> None:
         """
         Add a style to a part of the bar
@@ -178,7 +182,7 @@ class ProgressBar:
 
     def _compose(self, steps: int, percentage: int) -> str:
         """Compose the complete line that is to be printed"""
-        spin_char = self.spinner_frames[self.i%4]
+        spin_char = self.spinner(min(steps, percentage))
         bar = ( (steps * self.base_char) +                  # loaded portion
                 self.head_char +                            # head
                 (self.bar_width-steps) * self.todo_char)    # todo portion
